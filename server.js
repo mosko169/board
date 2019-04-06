@@ -28,3 +28,14 @@ boardsSocket.on('connection', boardSocket => {
 })
 
 s.listen(3000);
+
+const app = express()
+
+app.use('/static', express.static('resources/static'))
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.get('/', (req, res) => res.sendFile(__dirname + '/resources/loginPage.html'));
+
+
+app.listen(8080);
