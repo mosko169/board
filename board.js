@@ -23,9 +23,7 @@ class Board {
 
     _boradcast(drawingData) {
         Object.values(this.clients).forEach(client => {
-            client.sendDrawing(drawingData).catch(err => {
-                console.error('could not send data to client', client.id, ' error: ', err);
-            })
+            client.sendDrawing(drawingData);
         })
     }
 }

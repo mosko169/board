@@ -13,6 +13,14 @@ class BoardServer {
         this._registerClientsMgr(this.clientsMgr);
     }
 
+    getBoard(boardId) {
+        let board = this.boards[boardId];
+        if (!board) {
+            throw new Error("invalid board id ", boardId);
+        }
+        return board;
+    }
+
     _registerBoardsMgr(boardsMgr) {
         boardsMgr.on('newBoard', board => {
             this.boards[board.id] = board;
