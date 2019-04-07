@@ -11,6 +11,10 @@ class Client {
         return this.requestedBoarId;
     }
 
+    sendCanvas(canvasBuff) {
+        this.clientSocket.emit('canvas', canvasBuff);
+    }
+
     sendDrawing(drawingData) {
         this.clientSocket.emit('draw', {
             x: drawingData.x,

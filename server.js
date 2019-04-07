@@ -4,6 +4,7 @@ const EventEmitter = require('events');
 
 const BoardServer = require('./board_server');
 const Board = require('./board/board');
+const BoardCanvas = require('./board/board_canvas');
 const Client = require('./client')
 
 let clientsMgr = new EventEmitter();
@@ -28,7 +29,8 @@ clientsSocket.on('connection', clientSocket => {
 })
 
 boardsSocket.on('connection', boardSocket => {
-    boardsMgr.emit('newBoard', new Board(boardSocket, boardSocket.handshake.query.boardId));
+    let boardCanvas = new BoardCanvas();
+    boardsMgr.emit('newBoard', new Board(boardSocket, boardCanvas, boardSocket.handshake.query.boardId));
 })
 
 s.listen(3000);
