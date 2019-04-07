@@ -6,13 +6,13 @@
   */
   App.init = function() {
     App.canvas = document.createElement('canvas');
-    App.canvas.height = 400;
-    App.canvas.width = 800;
+    App.canvas.height = 600;
+    App.canvas.width = 1000;
     document.getElementsByTagName('article')[0].appendChild(App.canvas);
     App.ctx = App.canvas.getContext("2d");
     App.ctx.fillStyle = "solid";
-    App.ctx.strokeStyle = "#ECD018";
-    App.ctx.lineWidth = 5;
+    App.ctx.strokeStyle = "#000000";
+    App.ctx.lineWidth = 2;
     App.ctx.lineCap = "round";
     App.socket = io.connect('http://localhost:3000/boards?boardId=1');
     App.socket.on('draw', function(data) {
