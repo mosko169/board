@@ -3,7 +3,7 @@ const express = require('express');
 const EventEmitter = require('events');
 
 const BoardServer = require('./board_server');
-const Board = require('./board');
+const Board = require('./board/board');
 const Client = require('./client')
 
 let clientsMgr = new EventEmitter();
