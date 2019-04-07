@@ -1,14 +1,16 @@
 
 class Board {
-    constructor(boardSocket, id) {
+    constructor(boardSocket, boardCanvas, id) {
         this.boardSocket = boardSocket;
+        this.boardCanvas = boardCanvas;
         this._registerBoardEvents(boardSocket);
         this.id = id;
         this.clients = {};
     }
 
-    addClient(client) {
+    async addClient(client) {
         this.clients[client.id] = client;
+        client.sendCanvas(await this.boardCanvas.getCanvas());
     }
 
     removeClient(clientId) {
@@ -17,6 +19,7 @@ class Board {
 
     _registerBoardEvents(boardSocket) {
         boardSocket.on('drawing', (drawingData) => {
+            this.boardCanvas.draw(drawingData);
             this._boradcast(drawingData);
           });
     }
