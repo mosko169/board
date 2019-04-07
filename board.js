@@ -12,7 +12,7 @@ class Board {
     }
 
     removeClient(clientId) {
-        delete clients[clientId]
+        delete this.clients[clientId]
     }
 
     _registerBoardEvents(boardSocket) {

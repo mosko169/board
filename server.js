@@ -20,7 +20,11 @@ let boardsSocket = s.of('/boards');
 
 clientsSocket.on('connection', clientSocket => {
     let query = clientSocket.handshake.query;
-    clientsMgr.emit('newClient', new Client(clientSocket, query.clientId, query.boardId));
+    let clientId = query.clientId;
+    clientsMgr.emit('newClient', new Client(clientSocket, clientId, query.boardId));
+    clientSocket.on('disconnect', () => {
+        clientsMgr.emit('clientDisconnected', clientId)
+    });
 })
 
 boardsSocket.on('connection', boardSocket => {

@@ -6,6 +6,7 @@ class BoardServer {
         this.clientsMgr = clientsMgr;
 
         this.boardClients = {};
+        this.clientBoards = {};
         this.boards = {};
         this.clients = {};
 
@@ -21,6 +22,17 @@ class BoardServer {
         return board;
     }
 
+    addClient(client) {
+        this.clients[client.id] = client;
+        return this._bindClientToBoard(client);
+    }
+
+    removeClient(clientId) {
+        let deletedClient = this.clients[clientId];
+        delete this.clients[clientId];
+        return this._removeClientFromBoard(deletedClient);
+    }
+
     _registerBoardsMgr(boardsMgr) {
         boardsMgr.on('newBoard', board => {
             this.boards[board.id] = board;
@@ -30,17 +42,29 @@ class BoardServer {
 
     _registerClientsMgr(clientsMgr) {
         clientsMgr.on('newClient', client => {
-            this.clients[client.id] = client;
-
-            this._bindClientToBoard(client);
+            this.addClient(client);
         })
+
+        clientsMgr.on('clientDisconnected', clientId => {
+            this.removeClient(clientId);
+        });
+    }
+
+    getClientBoard(client) {
+        let boardId = client.getRequestedBoardId()
+        return this.getBoard(boardId);
+    }
+
+    _removeClientFromBoard(client) {
+        let requestedBoard = this.getClientBoard(client);
+        requestedBoard.removeClient(client.id);
+        delete this.boardClients[requestedBoard.id][client.id];
     }
 
     _bindClientToBoard(client) {
-        let boardId = client.getRequestedBoardId()
-        let requestedBoard = this.getBoard(boardId);
+        let requestedBoard = this.getClientBoard(client);
         requestedBoard.addClient(client);
-        this.boardClients[boardId][client.id] = client;
+        this.boardClients[requestedBoard.id][client.id] = client;
     }
 }
 
