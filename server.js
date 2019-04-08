@@ -22,15 +22,19 @@ let boardsSocket = s.of('/boards');
 clientsSocket.on('connection', clientSocket => {
     let query = clientSocket.handshake.query;
     let clientId = query.clientId;
-    clientsMgr.emit('newClient', new Client(clientSocket, clientId, query.boardId));
     clientSocket.on('disconnect', () => {
         clientsMgr.emit('clientDisconnected', clientId)
     });
+    clientsMgr.emit('newClient', new Client(clientSocket, clientId, query.boardId));
 })
 
 boardsSocket.on('connection', boardSocket => {
+    let boardId = boardSocket.handshake.query.boardId;
     let boardCanvas = new BoardCanvas();
-    boardsMgr.emit('newBoard', new Board(boardSocket, boardCanvas, boardSocket.handshake.query.boardId));
+    boardSocket.on('disconnect', () => {
+        boardsMgr.emit('boardDisconnected', boardId);
+    })
+    boardsMgr.emit('newBoard', new Board(boardSocket, boardCanvas, boardId));
 })
 
 s.listen(3000);

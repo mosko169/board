@@ -38,6 +38,17 @@ class BoardServer {
             this.boards[board.id] = board;
             this.boardClients[board.id] = {};
         })
+
+        boardsMgr.on('boardDisconnected', boardId => {
+            this.removeBoard(boardId);
+        });
+    }
+
+    removeBoard(boardId) {
+        Object.values(this.boardClients[boardId]).forEach(boundClient => {
+            boundClient.boardDisconnected();
+        })
+        delete this.boards[boardId];
     }
 
     _registerClientsMgr(clientsMgr) {

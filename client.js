@@ -11,6 +11,10 @@ class Client {
         return this.requestedBoarId;
     }
 
+    boardDisconnected() {
+        this.clientSocket.emit('boardDisconnected');
+    }
+
     sendCanvas(canvasBuff) {
         this.clientSocket.emit('canvas', canvasBuff);
     }
