@@ -6,6 +6,7 @@ const BoardServer = require('./board_server');
 const Board = require('./board/board');
 const BoardCanvas = require('./board/board_canvas');
 const Client = require('./client')
+const log = require('./common/logger');
 
 let clientsMgr = new EventEmitter();
 let boardsMgr = new EventEmitter();
@@ -22,18 +23,26 @@ let boardsSocket = s.of('/boards');
 clientsSocket.on('connection', clientSocket => {
     let query = clientSocket.handshake.query;
     let clientId = query.clientId;
+    log.info('client ' + clientId + ' connected from ' + clientSocket.handshake.address);
+
     clientSocket.on('disconnect', () => {
+        log.info('client ' + clientId + ' disconnected');
         clientsMgr.emit('clientDisconnected', clientId)
     });
+
     clientsMgr.emit('newClient', new Client(clientSocket, clientId, query.boardId));
 })
 
 boardsSocket.on('connection', boardSocket => {
     let boardId = boardSocket.handshake.query.boardId;
     let boardCanvas = new BoardCanvas();
+    log.info('board ' + boardId + ' connected from ' + boardSocket.handshake.address);
+
     boardSocket.on('disconnect', () => {
+        log.info('board ' + boardId +' disconnected');
         boardsMgr.emit('boardDisconnected', boardId);
     })
+    
     boardsMgr.emit('newBoard', new Board(boardSocket, boardCanvas, boardId));
 })
 
@@ -47,5 +56,5 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => res.sendFile(__dirname + '/resources/loginPage.html'));
 
-
+log.info("starting server");
 app.listen(8080);

@@ -1,4 +1,4 @@
-
+const log = require('./common/logger');
 
 class BoardServer {
     constructor(boardsMgr, clientsMgr) {
@@ -67,15 +67,24 @@ class BoardServer {
     }
 
     _removeClientFromBoard(client) {
-        let requestedBoard = this.getClientBoard(client);
-        requestedBoard.removeClient(client.id);
-        delete this.boardClients[requestedBoard.id][client.id];
+        try {
+            delete this.boardClients[requestedBoard.id][client.id];
+            let requestedBoard = this.getClientBoard(client);
+            requestedBoard.removeClient(client.id);
+        } catch (err) {
+            log.error('failed to remove client ' + client.id + ' from board ' + client.getRequestedBoardId() + ' error: ', err);
+        }
     }
 
     _bindClientToBoard(client) {
-        let requestedBoard = this.getClientBoard(client);
-        requestedBoard.addClient(client);
-        this.boardClients[requestedBoard.id][client.id] = client;
+        try {
+            log.info('binding client ' + client.id + ' to board ' + client.getRequestedBoardId());
+            let requestedBoard = this.getClientBoard(client);
+            requestedBoard.addClient(client);
+            this.boardClients[requestedBoard.id][client.id] = client;
+        } catch (err) {
+            log.error('failed to bind client ' + client.id + ' to board ' + client.getRequestedBoardId() + ' error: ', err);
+        }
     }
 }
 
