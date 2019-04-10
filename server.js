@@ -30,7 +30,7 @@ clientsSocket.on('connection', clientSocket => {
         clientsMgr.emit('clientDisconnected', clientId)
     });
 
-    clientsMgr.emit('newClient', new Client(clientSocket, clientId, query.boardId));
+    clientsMgr.emit('newClient', new Client(clientSocket, clientId, query.sessionId));
 })
 
 boardsSocket.on('connection', boardSocket => {
@@ -46,6 +46,10 @@ boardsSocket.on('connection', boardSocket => {
     boardsMgr.emit('newBoard', new Board(boardSocket, boardCanvas, boardId));
 })
 
+function validateClient(clientId) {
+    return true;
+}
+
 s.listen(3000);
 
 const app = express()
@@ -55,6 +59,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => res.sendFile(__dirname + '/resources/loginPage.html'));
+app.post('/login', (req, res) => {
+    let userId = req.body.userId;
+    let boardId = req.body.boardId;
+    let board = boardServer.getBoard(boardId);
+    res.send({
+        sessionId: board.sessionId,
+        canvasProperties: board.getCanvasProperties()
+    });
 
+});
 log.info("starting server");
 app.listen(8080);

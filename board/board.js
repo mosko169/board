@@ -13,6 +13,14 @@ class Board {
         client.sendCanvas(await this.boardCanvas.getCanvas());
     }
 
+    setSession(sessionId, sessionData) {
+        this.sessionId = sessionId;
+    }
+
+    getCanvasProperties() {
+        return this.boardCanvas.getCanvasProperties();
+    }
+
     removeClient(clientId) {
         delete this.clients[clientId]
     }

@@ -1,14 +1,10 @@
 
 
 class Client {
-    constructor(clientSocket, id, boardId) {
+    constructor(clientSocket, id, sessionId) {
         this.clientSocket = clientSocket;
-        this.requestedBoarId = boardId;
+        this.sessionId = sessionId;
         this.id = id;
-    }
-
-    getRequestedBoardId() {
-        return this.requestedBoarId;
     }
 
     boardDisconnected() {
