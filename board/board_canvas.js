@@ -1,4 +1,5 @@
 const fs = require('fs');
+const CanvasProperties = require('./canvas_properties');
 const canvas = require('canvas');
 const Drawing = require('./drawing');
 const Bluebird = require('bluebird');
@@ -9,8 +10,15 @@ const STROKE_STYLE = "#000000";
 const LINE_WIDTH = 2;
 const LINE_CAP = "round";
 
+const DEFAULT_CANVAS_PROPERTIES = new CanvasProperties(CANVAS_HEIGHT,
+     CANVAS_WIDTH, 
+     FILL_STYLE, 
+     STROKE_STYLE, 
+     LINE_WIDTH, 
+     LINE_CAP);
+
 class BoardCanvas {
-    constructor(canvasProperties) {
+    constructor(canvasProperties = DEFAULT_CANVAS_PROPERTIES) {
         this.canvasProperties = canvasProperties;
         
         let height = canvasProperties.height || CANVAS_HEIGHT;

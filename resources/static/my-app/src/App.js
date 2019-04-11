@@ -9,7 +9,7 @@ class App extends Component {
   
   constructor(props) {
     super(props);
-    this.state = {clientid: 'koral', boardId: '1'};
+    this.state = {userId: 'koral', boardId: '1'};
     this.sessionData = {
       sessionId: null, height: null, width : null, fillStyle: null, 
       strokeStyle: null, lineWidth: null, lineCap: null
@@ -23,22 +23,21 @@ class App extends Component {
     this.setState({value: event.target.value});
   }
 
-  handleSubmit(event){
-    var responseData = this.sendDataToServer();
+  async handleSubmit(event){
+    let responseData = await this.sendDataToServer();
     this.handlerResponse(responseData);
-
   }
 
 
   sendDataToServer() {
-    fetch('login/', {
+    return fetch('login/', {
     method: 'POST',
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      clientid: this.state.clientid,
+      userId: this.state.userId,
       boardId: this.state.boardId,
     })
   }).then(function(response){ 
@@ -60,7 +59,7 @@ class App extends Component {
     <Form>
       <Form.Group controlId="UserName">
         <Form.Label>Email address</Form.Label>
-        <Form.Control type="text" name="clientId" defaultValue={this.state.clientid} placeholder="Enter User Name" />
+        <Form.Control type="text" name="clientId" defaultValue={this.state.userId} placeholder="Enter User Name" />
       </Form.Group>
       <Form.Group controlId="boardId">
         <Form.Label>boardId</Form.Label>
