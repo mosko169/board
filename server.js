@@ -54,11 +54,11 @@ s.listen(3000);
 
 const app = express()
 
-app.use('/static', express.static('resources/static'))
+app.use('/static', express.static('build/static'))
+app.use('/', express.static('build'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => res.sendFile(__dirname + '/resources/loginPage.html'));
 app.post('/login', (req, res) => {
     let userId = req.body.userId;
     let boardId = req.body.boardId;
@@ -67,7 +67,9 @@ app.post('/login', (req, res) => {
         sessionId: board.sessionId,
         canvasProperties: board.getCanvasProperties()
     });
-
 });
+
+app.get('/', (req, res) => res.sendFile(__dirname + '/build/index.html'));
+
 log.info("starting server");
 app.listen(8080);
