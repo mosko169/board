@@ -99,10 +99,10 @@ function screenShotAction(filename){    //download the img
   lnk.download = filename;
   lnk.href = canvas.toDataURL("image/png;base64");
   /// create a "fake" click-event to trigger the download
-    e = document.createEvent("MouseEvents");
-    e.initMouseEvent("click", true, true, window,
-                     0, 0, 0, 0, 0, false, false, false,
-                     false, 0, null);
+  e = document.createEvent("MouseEvents");
+  e.initMouseEvent("click", true, true, window,
+                    0, 0, 0, 0, 0, false, false, false,
+                    false, 0, null);
 
-    lnk.dispatchEvent(e);
+  lnk.dispatchEvent(e);
 };

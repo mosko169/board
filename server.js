@@ -41,11 +41,12 @@ s.listen(3000);
 
 const app = express()
 
-app.use('/static', express.static('resources/static'))
+app.use('/static', express.static('build/static'))
+app.use('/', express.static('build'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => res.sendFile(__dirname + '/resources/loginPage.html'));
+app.get('/', (req, res) => res.sendFile(__dirname + '/build/index.html'));
 
 
 app.listen(8080);
