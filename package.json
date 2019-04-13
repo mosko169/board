@@ -1,6 +1,9 @@
 {
   "name": "board",
   "version": "1.0.0",
+  "scripts": {
+    "server": "nodemon server.js"
+	},
   "description": "board",
   "main": "server.js",
   "dependencies": {

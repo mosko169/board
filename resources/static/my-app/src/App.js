@@ -10,11 +10,8 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {userId: 'koral', boardId: '1'};
-    this.sessionData = {
-      sessionId: null, height: null, width : null, fillStyle: null, 
-      strokeStyle: null, lineWidth: null, lineCap: null
-    }
-
+    this.canvasData = null;
+    this.responseData = null;
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -25,7 +22,7 @@ class App extends Component {
 
   async handleSubmit(event){
     let responseData = await this.sendDataToServer();
-    this.handlerResponse(responseData);
+    this.responseData = responseData;
   }
 
 
@@ -43,10 +40,6 @@ class App extends Component {
   }).then(function(response){ 
     return response.json();   
    })
-  }
-
-  handlerResponse(responseData){
-    alert('show canvas with meta data');
   }
 
   handleSaveUserData(){
@@ -77,78 +70,92 @@ class App extends Component {
 
 }
 
-function loadCanvas(clientid, sessionId) {
-  var App;
-  App = {};
-  /*
-      Init 
-  */
-  function renderCanvas(canvasCtx, canvasBuff) {
-
-    var blob = new Blob([canvasBuff], {type: 'image/png'});
-    var url = URL.createObjectURL(blob);
-    var img = new Image;
-
-    img.onload = function() {
-        canvasCtx.drawImage(this, 0, 0);
-        URL.revokeObjectURL(url);
+class Canvas extends App {
+  
+  constructor(props, responseData) {
+    super(props);
+    this.sessionData = {
+      sessionId: this.props.responseData.sessionId, height: this.props.responseData.height, width : this.props.responseData.width, fillStyle: this.props.responseData.fillStyle, 
+      strokeStyle: this.props.responseData.strokeStyle, lineWidth: this.props.responseData.lineWidth, lineCap: this.props.responseData.lineCap
     }
-    img.src = url;
+    this.loadCanvas();
   }
 
-
-  App.init = function() {
-    App.canvas = document.createElement('canvas');
-    App.canvas.className = 'canvas';
-    App.canvas.height = 600;
-    App.canvas.width = 1000;
-    document.getElementsByTagName('article')[0].appendChild(App.canvas);
-    App.ctx = App.canvas.getContext("2d");
-    App.ctx.fillStyle = "solid";
-    App.ctx.strokeStyle = "#333";
-    App.ctx.lineWidth = 2;
-    App.ctx.lineCap = "round";
-    App.socket =  io.connect('http://localhost:3000/clients?clientId=' + clientid+ '&sessionId='+ sessionId);
-    App.socket.on('canvas', canvasBuff => {
-      renderCanvas(App.ctx, canvasBuff);
-    })
-    App.socket.on('draw', function(data) {
-      return App.draw(data.x, data.y, data.type);
-    });
-    App.draw = function(x, y, type) {
-      if (type === "dragstart") {
-        App.ctx.beginPath();
-        return App.ctx.moveTo(x, y);
-      } else if (type === "drag") {
-        App.ctx.lineTo(x, y);
-        return App.ctx.stroke();
-      } else {
-        return App.ctx.closePath();
+  loadCanvas() {
+    var App;
+    App = {};
+    /*
+        Init 
+    */
+    function renderCanvas(canvasCtx, canvasBuff) {
+  
+      var blob = new Blob([canvasBuff], {type: 'image/png'});
+      var url = URL.createObjectURL(blob);
+      var img = new Image();
+  
+      img.onload = function() {
+          canvasCtx.drawImage(this, 0, 0);
+          URL.revokeObjectURL(url);
       }
+      img.src = url;
+    }
+  
+  
+    App.init = function() {
+      App.canvas = document.createElement('canvas');
+      App.canvas.className = 'canvas';
+      App.canvas.height = this.height;
+      App.canvas.width = this.width;
+      document.getElementsByTagName('article')[0].appendChild(App.canvas);
+      App.ctx = App.canvas.getContext("2d");
+      App.ctx.fillStyle = this.fillStyle;
+      App.ctx.strokeStyle = this.strokeStyle;
+      App.ctx.lineWidth = this.lineWidth;
+      App.ctx.lineCap = this.lineCap;
+      App.socket =  io.connect('http://localhost:3000/clients?clientId=' + this.userId+ '&sessionId='+ this.sessionData.sessionId);
+      App.socket.on('canvas', canvasBuff => {
+        renderCanvas(App.ctx, canvasBuff);
+      })
+      App.socket.on('draw', function(data) {
+        return App.draw(data.x, data.y, data.type);
+      });
+      App.draw = function(x, y, type) {
+        if (type === "dragstart") {
+          App.ctx.beginPath();
+          return App.ctx.moveTo(x, y);
+        } else if (type === "drag") {
+          App.ctx.lineTo(x, y);
+          return App.ctx.stroke();
+        } else {
+          return App.ctx.closePath();
+        }
+      };
     };
-  };
-  /*
-      Draw Events
-  */
-  $('canvas').on('drag dragstart dragend', function(e) {
-    var offset, type, x, y;
-    type = e.handleObj.type;
-    offset = $(this).offset();
-    e.offsetX = e.layerX - offset.left;
-    e.offsetY = e.layerY - offset.top;
-    x = e.offsetX;
-    y = e.offsetY;
-    App.draw(x, y, type);
-    App.socket.emit('drawClick', {
-      x: x,
-      y: y,
-      type: type
+    /*
+        Draw Events
+    */
+    $('canvas').on('drag dragstart dragend', function(e) {
+      var offset, type, x, y;
+      type = e.handleObj.type;
+      offset = $(this).offset();
+      e.offsetX = e.layerX - offset.left;
+      e.offsetY = e.layerY - offset.top;
+      x = e.offsetX;
+      y = e.offsetY;
+      App.draw(x, y, type);
+      App.socket.emit('drawClick', {
+        x: x,
+        y: y,
+        type: type
+      });
     });
-  });
-  $(function() {
-    return App.init();
-  });
+    $(function() {
+      return App.init();
+    });
+  }
+
 }
+ 
 
 
 
