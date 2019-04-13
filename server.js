@@ -50,7 +50,7 @@ function validateClient(clientId) {
     return true;
 }
 
-s.listen(3000);
+s.listen(4000);
 
 const app = express()
 
@@ -69,7 +69,7 @@ app.post('/login', (req, res) => {
     });
 });
 
-app.get('/', (req, res) => res.sendFile(__dirname + '/build/index.html'));
+//app.get('/', (req, res) => res.sendFile(__dirname + '/build/index.html'));
 
 log.info("starting server");
 app.listen(8080);
