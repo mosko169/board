@@ -1,75 +1,52 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client'; 
-import {$} from 'jquery';
+import $ from 'jquery';
+import './Canvas.css'; 
 
-
-class Canvas extends Component {
+export default class Canvas extends Component {
   
-    constructor(props, responseData, userId) {
+    constructor(props) {
       super(props);
-      this.userId = userId;
+      this.userId = this.props.userId;
       this.sessionData = {
-        sessionId: responseData.sessionId, height: props.responseData.height, width : responseData.width, fillStyle: responseData.fillStyle, 
-        strokeStyle: responseData.strokeStyle, lineWidth: responseData.lineWidth, lineCap: responseData.lineCap
+        sessionId: this.props.responseData.sessionId, height: this.props.responseData.canvasProperties.height, width : this.props.responseData.canvasProperties.width, fillStyle: this.props.responseData.canvasProperties.fillStyle, 
+        strokeStyle: this.props.responseData.canvasProperties.strokeStyle, lineWidth: this.props.responseData.canvasProperties.lineWidth, lineCap: this.props.responseData.canvasProperties.lineCap
       }
-      this.loadCanvas();
       this.screenShotAction = this.screenShotAction.bind(this);
-
+      this.canvasRef = React.createRef();
     }
   
-    loadCanvas() {
-      var App;
-      App = {};
-      /*
-          Init 
-      */
-      function renderCanvas(canvasCtx, canvasBuff) {
-    
-        var blob = new Blob([canvasBuff], {type: 'image/png'});
-        var url = URL.createObjectURL(blob);
-        var img = new Image();
-    
-        img.onload = function() {
-            canvasCtx.drawImage(this, 0, 0);
-            URL.revokeObjectURL(url);
+    render() {
+      return <canvas  ref="canvas" width={this.sessionData.width} height={this.sessionData.height}/>;
+    }
+  
+    componentDidMount() {
+      let App = {};
+      App.ctx = this.refs.canvas.getContext('2d');
+      App.ctx.fillStyle = this.sessionData.fillStyle;
+      App.ctx.strokeStyle = this.sessionData.strokeStyle;
+      App.ctx.lineWidth = this.sessionData.lineWidth;
+      App.ctx.lineCap = this.sessionData.lineCap;
+      App.socket =  io.connect('http://localhost:4000/clients?clientId=' + this.userId+ '&sessionId='+ this.sessionData.sessionId);
+      App.socket.on('canvas', canvasBuff => {
+        this.renderCanvas(App.ctx, canvasBuff);
+      })
+      App.socket.on('draw', function(data) {
+        return App.draw(data.x, data.y, data.type);
+      });
+      App.draw = function(x, y, type) {
+        if (type === "dragstart") {
+          App.ctx.beginPath();
+          return App.ctx.moveTo(x, y);
+        } else if (type === "drag") {
+          App.ctx.lineTo(x, y);
+          return App.ctx.stroke();
+        } else {
+          return App.ctx.closePath();
         }
-        img.src = url;
-      }
-    
-    
-      App.init = function() {
-        App.canvas = document.createElement('canvas');
-        App.canvas.className = 'canvas';
-        App.canvas.height = this.height;
-        App.canvas.width = this.width;
-        document.getElementsByTagName('article')[0].appendChild(App.canvas);
-        App.ctx = App.canvas.getContext("2d");
-        App.ctx.fillStyle = this.fillStyle;
-        App.ctx.strokeStyle = this.strokeStyle;
-        App.ctx.lineWidth = this.lineWidth;
-        App.ctx.lineCap = this.lineCap;
-        App.socket =  io.connect('http://localhost:4000/clients?clientId=' + this.userId+ '&sessionId='+ this.sessionData.sessionId);
-        App.socket.on('canvas', canvasBuff => {
-          renderCanvas(App.ctx, canvasBuff);
-        })
-        App.socket.on('draw', function(data) {
-          return App.draw(data.x, data.y, data.type);
-        });
-        App.draw = function(x, y, type) {
-          if (type === "dragstart") {
-            App.ctx.beginPath();
-            return App.ctx.moveTo(x, y);
-          } else if (type === "drag") {
-            App.ctx.lineTo(x, y);
-            return App.ctx.stroke();
-          } else {
-            return App.ctx.closePath();
-          }
-        };
       };
-      /*
-          Draw Events
-      */
+  
+  
       $('canvas').on('drag dragstart dragend', function(e) {
         var offset, type, x, y;
         type = e.handleObj.type;
@@ -85,11 +62,21 @@ class Canvas extends Component {
           type: type
         });
       });
-      $(function() {
-        return App.init();
-      });
     }
   
+    renderCanvas(canvasCtx, canvasBuff) {
+      var blob = new Blob([canvasBuff], {type: 'image/png'});
+      var url = URL.createObjectURL(blob);
+      var img = new Image();
+  
+      img.onload = function() {
+          canvasCtx.drawImage(this, 0, 0);
+          URL.revokeObjectURL(url);
+      }
+      img.src = url;
+    }
+  
+    
     screenShotAction(filename){    //download the img
         var canvas = document.getElementsByClassName('canvas')[0];
         var lnk = document.createElement('a'), e;
@@ -103,8 +90,8 @@ class Canvas extends Component {
       
         lnk.dispatchEvent(e);
       };
-
-
+  
+  
     screenShopButton(){
         var button = document.createElement('button');
         button.innerHTML = 'Screen Shot';
@@ -114,9 +101,7 @@ class Canvas extends Component {
         };
         document.body.appendChild(button);
       };
-
-
+  
+  
       
   }
-
-  export default Canvas;
