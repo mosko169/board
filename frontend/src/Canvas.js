@@ -12,7 +12,6 @@ export default class Canvas extends Component {
         sessionId: this.props.responseData.sessionId, height: this.props.responseData.canvasProperties.height, width : this.props.responseData.canvasProperties.width, fillStyle: this.props.responseData.canvasProperties.fillStyle, 
         strokeStyle: this.props.responseData.canvasProperties.strokeStyle, lineWidth: this.props.responseData.canvasProperties.lineWidth, lineCap: this.props.responseData.canvasProperties.lineCap
       }
-      this.screenShotAction = this.screenShotAction.bind(this);
       this.canvasRef = React.createRef();
     }
   
@@ -66,7 +65,6 @@ export default class Canvas extends Component {
         var filename = 'mycanvas.png';
         var button = document.createElement('button');
         button.innerHTML = 'Screen Shot';
-        button.variant = "outline-info";
         button.className = "btn btn-primary";
         button.onclick = function screenShot(){
             var canvas = document.getElementById('userCanvas');
