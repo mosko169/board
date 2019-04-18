@@ -17,7 +17,7 @@ export default class Canvas extends Component {
     }
   
     render() {
-      return <canvas  ref="canvas" width={this.sessionData.width} height={this.sessionData.height}/>;
+      return <canvas  ref="canvas" id="userCanvas" width={this.sessionData.width} height={this.sessionData.height}/>;
     }
   
     componentDidMount() {
@@ -62,6 +62,25 @@ export default class Canvas extends Component {
           type: type
         });
       });
+
+        var filename = 'mycanvas.png';
+        var button = document.createElement('button');
+        button.innerHTML = 'Screen Shot';
+        button.variant = "outline-info";
+        button.className = "btn btn-primary";
+        button.onclick = function screenShot(){
+            var canvas = document.getElementById('userCanvas');
+            var link = document.createElement('a'), e;
+            link.download = filename;
+            link.href = canvas.toDataURL("image/png;base64");
+            /// create a "fake" click-event to trigger the download
+            e = document.createEvent("MouseEvents");
+            e.initMouseEvent("click", true, true, window,
+                                0, 0, 0, 0, 0, false, false, false,
+                                false, 0, null);
+            link.dispatchEvent(e);
+            }
+        document.body.appendChild(button);
     }
   
     renderCanvas(canvasCtx, canvasBuff) {
@@ -74,34 +93,6 @@ export default class Canvas extends Component {
           URL.revokeObjectURL(url);
       }
       img.src = url;
-    }
+    } 
   
-    
-    screenShotAction(filename){    //download the img
-        var canvas = document.getElementsByClassName('canvas')[0];
-        var lnk = document.createElement('a'), e;
-        lnk.download = filename;
-        lnk.href = canvas.toDataURL("image/png;base64");
-        /// create a "fake" click-event to trigger the download
-        e = document.createEvent("MouseEvents");
-        e.initMouseEvent("click", true, true, window,
-                          0, 0, 0, 0, 0, false, false, false,
-                          false, 0, null);
-      
-        lnk.dispatchEvent(e);
-      };
-  
-  
-    screenShopButton(){
-        var button = document.createElement('button');
-        button.innerHTML = 'Screen Shot';
-        button.className = "btn btn-primary";
-        button.onclick = function(){
-          this.screenShotAction('mycanvas.png');
-        };
-        document.body.appendChild(button);
-      };
-  
-  
-      
-  }
+}

@@ -41,9 +41,7 @@ class MainPage extends React.Component {
     renderElement(){
         if(this.state.showForm)
            return <UserDetails onSubmitForm={this.handleSubmitForm} onChange={this.handleChange} userId={this.state.userId} boardId={this.state.boardId} responseData={this.state.responseData}/>;
-        return <Canvas 
-        userId={this.state.userId}
-        responseData={this.state.responseData} />;
+        return (<Canvas userId={this.state.userId} responseData={this.state.responseData} />);
      }
 
     render(){
