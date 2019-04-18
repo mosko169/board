@@ -89,11 +89,11 @@ class BoardServer {
 
     _removeClientFromBoard(client) {
         try {
-            delete this.boardClients[requestedBoard.id][client.id];
             let requestedBoard = this.getClientBoard(client);
+            delete this.boardClients[requestedBoard.id][client.id];
             requestedBoard.removeClient(client.id);
         } catch (err) {
-            log.error('failed to remove client ' + client.id + ' from board ' + client.getRequestedBoardId() + ' error: ', err);
+            log.error('failed to remove client ' + client.id + ' from board ' + this.sessions[client.sessionId] + ' error: ', err);
         }
     }
 

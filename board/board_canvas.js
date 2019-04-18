@@ -23,7 +23,7 @@ class BoardCanvas {
         
         let height = canvasProperties.height || CANVAS_HEIGHT;
         let width = canvasProperties.width || CANVAS_WIDTH;
-        this.canvas = canvas.createCanvas(height, width);
+        this.canvas = canvas.createCanvas(width, height);
         this.canvasContext = this.canvas.getContext('2d');
 
         this.canvasContext.fillStyle = canvasProperties.fillStyle || FILL_STYLE;

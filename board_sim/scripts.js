@@ -6,8 +6,8 @@
   */
   App.init = function() {
     App.canvas = document.createElement('canvas');
-    App.canvas.height = 600;
-    App.canvas.width = 1000;
+    App.canvas.height = 400;
+    App.canvas.width = 800;
     document.getElementsByTagName('article')[0].appendChild(App.canvas);
     App.ctx = App.canvas.getContext("2d");
     App.ctx.fillStyle = "solid";
@@ -34,13 +34,9 @@
   	Draw Events
   */
   $('canvas').live('drag dragstart dragend', function(e) {
-    var offset, type, x, y;
     type = e.handleObj.type;
-    offset = $(this).offset();
-    e.offsetX = e.layerX - offset.left;
-    e.offsetY = e.layerY - offset.top;
-    x = e.offsetX;
-    y = e.offsetY;
+    x = e.layerX;
+    y = e.layerY;
     App.draw(x, y, type);
     App.socket.emit('drawing', {
       x: x,
