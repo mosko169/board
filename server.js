@@ -33,9 +33,10 @@ clientsSocket.on('connection', clientSocket => {
     clientsMgr.emit('newClient', new Client(clientSocket, clientId, query.sessionId));
 })
 
-boardsSocket.on('connection', boardSocket => {
+boardsSocket.on('connection', async boardSocket => {
     let boardId = boardSocket.handshake.query.boardId;
     let boardCanvas = new BoardCanvas();
+    await boardCanvas.init();
     log.info('board ' + boardId + ' connected from ' + boardSocket.handshake.address);
 
     boardSocket.on('disconnect', () => {

@@ -68,6 +68,7 @@ class BoardServer {
             boundClient.boardDisconnected();
         })
         let boardCurrentSession = this.boards[boardId] && this.boards[boardId].sessionId;
+        this.boards[boardId].terminate();
         delete this.boards[boardId];
         delete this.sessions[boardCurrentSession];
     }

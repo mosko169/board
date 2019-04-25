@@ -10,7 +10,7 @@ class Board {
 
     async addClient(client) {
         this.clients[client.id] = client;
-        client.sendCanvas(await this.boardCanvas.getCanvas());
+        client.sendCanvas(this.boardCanvas.getCanvas());
     }
 
     setSession(sessionId, sessionData) {
@@ -36,6 +36,10 @@ class Board {
         Object.values(this.clients).forEach(client => {
             client.sendDrawing(drawingData);
         })
+    }
+
+    terminate() {
+        this.boardCanvas.terminate();
     }
 }
 
