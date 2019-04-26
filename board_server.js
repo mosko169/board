@@ -58,16 +58,17 @@ class BoardServer {
             this.startSession(board.id);
         })
 
-        boardsMgr.on('boardDisconnected', boardId => {
-            this.removeBoard(boardId);
+        boardsMgr.on('boardDisconnected', async boardId => {
+            await this.removeBoard(boardId);
         });
     }
 
-    removeBoard(boardId) {
+    async removeBoard(boardId) {
         Object.values(this.boardClients[boardId]).forEach(boundClient => {
             boundClient.boardDisconnected();
         })
         let boardCurrentSession = this.boards[boardId] && this.boards[boardId].sessionId;
+        await this.boards[boardId].stop();
         delete this.boards[boardId];
         delete this.sessions[boardCurrentSession];
     }

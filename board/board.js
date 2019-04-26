@@ -1,8 +1,10 @@
 
 class Board {
-    constructor(boardSocket, boardCanvas, id) {
+    constructor(boardSocket, boardCanvas, recorderProvider, id) {
         this.boardSocket = boardSocket;
         this.boardCanvas = boardCanvas;
+        this.recorderProvider = recorderProvider;
+
         this._registerBoardEvents(boardSocket);
         this.id = id;
         this.clients = {};
@@ -10,11 +12,19 @@ class Board {
 
     async addClient(client) {
         this.clients[client.id] = client;
-        client.sendCanvas(await this.boardCanvas.getCanvas());
+        client.sendCanvas(this.boardCanvas.getCanvas());
     }
 
     setSession(sessionId, sessionData) {
         this.sessionId = sessionId;
+        this.recorder = this.recorderProvider.getRecorder(sessionId, this.boardCanvas);
+        this.recorder.start();
+    }
+
+    async stop() {
+        if (this.recorder) {
+            return this.recorder.stop();
+        }
     }
 
     getCanvasProperties() {

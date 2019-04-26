@@ -1,0 +1,32 @@
+const fs = require('fs');
+
+class Recorder {
+    constructor(canvas, encoder, frameRate) {
+        this.canvas = canvas;
+        this.encoder = encoder;
+        this.frameRate = frameRate;
+        this.counter = 0;
+    }
+
+    start() {
+        this.encoder.start();
+        this.sampler = setInterval(this._sampleFrame.bind(this), this.frameRate);
+    }
+
+    stop() {
+        clearInterval(this.sampler);
+        return this.encoder.stop();
+    }
+
+    _sampleFrame() {
+        
+        let frame = this.canvas.getCanvas();
+        this.counter++;
+        let zeroFilled = (new Array(3).join('0') + this.counter).substr(-3);
+        fs.writeFileSync("c:\\a\\f" + zeroFilled+ ".png", frame);
+        this.encoder.processFrame(frame);
+    }
+
+}
+
+module.exports = Recorder;

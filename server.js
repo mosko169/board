@@ -2,6 +2,7 @@ const socketio = require('socket.io');
 const express = require('express');
 const EventEmitter = require('events');
 
+const RecorderPovider = require('./board/record/recorder_provider');
 const BoardServer = require('./board_server');
 const Board = require('./board/board');
 const BoardCanvas = require('./board/board_canvas');
@@ -33,6 +34,8 @@ clientsSocket.on('connection', clientSocket => {
     clientsMgr.emit('newClient', new Client(clientSocket, clientId, query.sessionId));
 })
 
+let recorderPovider = new RecorderPovider();
+
 boardsSocket.on('connection', boardSocket => {
     let boardId = boardSocket.handshake.query.boardId;
     let boardCanvas = new BoardCanvas();
@@ -43,7 +46,7 @@ boardsSocket.on('connection', boardSocket => {
         boardsMgr.emit('boardDisconnected', boardId);
     })
     
-    boardsMgr.emit('newBoard', new Board(boardSocket, boardCanvas, boardId));
+    boardsMgr.emit('newBoard', new Board(boardSocket, boardCanvas, recorderPovider, boardId));
 })
 
 function validateClient(clientId) {

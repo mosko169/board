@@ -11,7 +11,7 @@
     document.getElementsByTagName('article')[0].appendChild(App.canvas);
     App.ctx = App.canvas.getContext("2d");
     App.ctx.fillStyle = "solid";
-    App.ctx.strokeStyle = "#000000";
+    App.ctx.strokeStyle = "#FF0000";
     App.ctx.lineWidth = 2;
     App.ctx.lineCap = "round";
     App.socket = io.connect('http://localhost:4000/boards?boardId=1');
