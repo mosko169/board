@@ -5,7 +5,6 @@ class Recorder {
         this.canvas = canvas;
         this.encoder = encoder;
         this.frameRate = frameRate;
-        this.counter = 0;
     }
 
     start() {
@@ -19,11 +18,7 @@ class Recorder {
     }
 
     _sampleFrame() {
-        
         let frame = this.canvas.getCanvas();
-        this.counter++;
-        let zeroFilled = (new Array(3).join('0') + this.counter).substr(-3);
-        fs.writeFileSync("c:\\a\\f" + zeroFilled+ ".png", frame);
         this.encoder.processFrame(frame);
     }
 
