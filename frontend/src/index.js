@@ -5,7 +5,9 @@ import './index.css';
 import * as serviceWorker from './serviceWorker';
 import Canvas from './Canvas'
 import UserDetails from './App'
-import Appnav  from './nav'
+import { Lessons, Video }  from './lessons'
+import { Navbar, Nav} from 'react-bootstrap';
+import { Route, Link, BrowserRouter as Router } from 'react-router-dom'
 
 class MainPage extends React.Component {
     constructor(props) {
@@ -33,9 +35,7 @@ class MainPage extends React.Component {
             responseData: data,
             showCanvs: true,
             showForm: false,
-          });
-          console.log(this.showCanvs);	  
- 
+          }); 
     }
 
     renderElement(){
@@ -47,8 +47,6 @@ class MainPage extends React.Component {
     render(){
       return (
         <div>
-        <Appnav />
-        <br/>
         <div>
         { this.renderElement() }
         </div>
@@ -58,7 +56,28 @@ class MainPage extends React.Component {
     }
   };
 
-ReactDOM.render(<MainPage />, document.getElementById('root'));
+
+  const routing = (
+    <Router>
+      <div>
+      <Navbar bg="light" expand="lg">
+        <Navbar.Brand href="#">Smart Board</Navbar.Brand>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="mr-auto">
+            <Nav.Link> <Link to="/">Bla</Link></Nav.Link>
+            <Nav.Link> <Link to="/lessons">Lessons</Link></Nav.Link>
+            </Nav>
+        </Navbar.Collapse>
+        </Navbar>
+        <Route exact path="/" component={MainPage} />
+        <Route path="/lessons" component={Lessons} />
+        <Route path="/video" component={Video} />
+      </div>
+    </Router>
+  )
+ReactDOM.render(routing, document.getElementById('root'))
+//ReactDOM.render(<MainPage />, document.getElementById('root'));
 
 
 // If you want your app to work offline and load faster, you can change
