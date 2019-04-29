@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "scripts": {
     "server": "nodemon server.js"
-	},
+  },
   "description": "board",
   "main": "server.js",
   "dependencies": {
     "bluebird": "^3.5.4",
     "canvas": "^2.4.1",
     "express": "^4.16.4",
+    "range-parser": "^1.2.0",
     "socket.io": "^2.2.0",
     "winston": "^3.2.1"
   },

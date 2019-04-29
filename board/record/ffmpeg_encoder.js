@@ -1,10 +1,11 @@
 const spawn = require('child_process').spawn;
 
 const FFMPEG_PATH = "C:\\ffmpeg\\bin\\ffmpeg.exe";
+const FORMAT = 'mp4';
 
 class FFMPEGEncoder {
-    constructor(frameRate, outputFile) {
-        this.outputFile = outputFile;
+    constructor(frameRate, outputFile, format) {
+        this.outputFile = outputFile + '.' + format;
         this.frameRate = 1000 / frameRate;
     }
 
@@ -33,5 +34,7 @@ class FFMPEGEncoder {
         return encoderFinishP;
     }
 }
+
+FFMPEGEncoder.FORMAT = FORMAT;
 
 module.exports = FFMPEGEncoder;
