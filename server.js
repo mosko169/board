@@ -19,6 +19,10 @@ const Encoder = require('./board/record/ffmpeg_encoder');
 
 const RECORDS_PATH = path.join(process.cwd(), "records");
 
+if (!fs.existsSync(RECORDS_PATH)) {
+    fs.mkdirSync(RECORDS_PATH);
+}
+
 let clientsMgr = new EventEmitter();
 let boardsMgr = new EventEmitter();
 
