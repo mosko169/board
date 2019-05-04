@@ -19,11 +19,14 @@ class Board {
         this.sessionId = sessionId;
         this.recorder = this.recorderProvider.getRecorder(sessionId, this.boardCanvas);
         this.recorder.start();
+        return this.recorder.outputPath;
     }
 
-    async stop() {
+    async stopSession() {
         if (this.recorder) {
-            return this.recorder.stop();
+            return this.recorder.stop().then(() => {
+                this.recorder = null;
+            });
         }
     }
 

@@ -17,106 +17,124 @@ const Client = require('./client')
 const log = require('./common/logger');
 const Encoder = require('./board/record/ffmpeg_encoder');
 
-const RECORDS_PATH = path.join(process.cwd(), "records");
+const DbConn = require('./db_conn');
+const Lessons = require('./data/lessons');
 
-if (!fs.existsSync(RECORDS_PATH)) {
-    fs.mkdirSync(RECORDS_PATH);
-}
+const RECORDS_PATH = path.join(process.cwd(), "records", "artifacts");
 
-let clientsMgr = new EventEmitter();
-let boardsMgr = new EventEmitter();
+async function main() {
 
-let boardServer = new BoardServer(boardsMgr, clientsMgr);
+    if (!fs.existsSync(RECORDS_PATH)) {
+        fs.mkdirSync(RECORDS_PATH);
+    }
 
-let s = socketio({
-    path: '/socket.io',
-  });
+    let dbConn = await DbConn.getDBConn();
+    let clientsMgr = new EventEmitter();
+    let boardsMgr = new EventEmitter();
 
-let clientsSocket = s.of('/clients');
-let boardsSocket = s.of('/boards');
+    let boardServer = new BoardServer(boardsMgr, clientsMgr, new Lessons(dbConn));
 
-clientsSocket.on('connection', clientSocket => {
-    let query = clientSocket.handshake.query;
-    let clientId = query.clientId;
-    log.info('client ' + clientId + ' connected from ' + clientSocket.handshake.address);
-
-    clientSocket.on('disconnect', () => {
-        log.info('client ' + clientId + ' disconnected');
-        clientsMgr.emit('clientDisconnected', clientId)
+    let s = socketio({
+        path: '/socket.io',
     });
 
-    clientsMgr.emit('newClient', new Client(clientSocket, clientId, query.sessionId));
-})
+    let clientsSocket = s.of('/clients');
+    let boardsSocket = s.of('/boards');
 
-let recorderPovider = new RecorderPovider(RECORDS_PATH);
+    clientsSocket.on('connection', clientSocket => {
+        let query = clientSocket.handshake.query;
+        let clientId = query.clientId;
+        log.info('client ' + clientId + ' connected from ' + clientSocket.handshake.address);
 
-boardsSocket.on('connection', boardSocket => {
-    let boardId = boardSocket.handshake.query.boardId;
-    let boardCanvas = new BoardCanvas();
-    log.info('board ' + boardId + ' connected from ' + boardSocket.handshake.address);
+        clientSocket.on('disconnect', () => {
+            log.info('client ' + clientId + ' disconnected');
+            clientsMgr.emit('clientDisconnected', clientId)
+        });
 
-    boardSocket.on('disconnect', () => {
-        log.info('board ' + boardId +' disconnected');
-        boardsMgr.emit('boardDisconnected', boardId);
+        clientsMgr.emit('newClient', new Client(clientSocket, clientId, query.sessionId));
     })
-    
-    boardsMgr.emit('newBoard', new Board(boardSocket, boardCanvas, recorderPovider, boardId));
-})
 
-function validateClient(clientId) {
-    return true;
+    let recorderPovider = new RecorderPovider(RECORDS_PATH);
+
+    boardsSocket.on('connection', boardSocket => {
+        let boardId = boardSocket.handshake.query.boardId;
+        let boardCanvas = new BoardCanvas();
+        log.info('board ' + boardId + ' connected from ' + boardSocket.handshake.address);
+
+        boardSocket.on('disconnect', () => {
+            log.info('board ' + boardId +' disconnected');
+            boardsMgr.emit('boardDisconnected', boardId);
+        })
+        
+        boardsMgr.emit('newBoard', new Board(boardSocket, boardCanvas, recorderPovider, boardId));
+    })
+
+    s.listen(4000);
+
+    const app = express()
+
+    app.use('/static', express.static('build/static'))
+    app.use('/', express.static('build'));
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+
+    app.post('/login', (req, res) => {
+        let userId = req.body.userId;
+        let boardId = req.body.boardId;
+        let board = boardServer.getBoard(boardId);
+        res.send({
+            sessionId: board.sessionId,
+            canvasProperties: board.getCanvasProperties()
+        });
+    });
+
+    app.post('/liveSessions/start', (req, res) => {
+        let boardId = Number(req.body.boardId);
+        let courseId = Number(req.body.courseId);
+        let lessonName = req.body.lessonName;
+        boardServer.startSession(boardId, {courseId: courseId, lessonName: lessonName});
+        res.send();
+    });
+
+    app.post('/liveSessions/stop', async (req, res) => {
+        let sessionId = req.body.sessionId;
+        await boardServer.stopSession(sessionId);
+        res.send();
+    });
+
+    app.get('/lessons', async (req, res) => {
+        let lessons = await fs.readdirP(RECORDS_PATH);
+        let lessonsCount = 0;
+        res.send(lessons.map(lesson => {
+            return {
+                lessonId: path.basename(lesson, '.' + Encoder.FORMAT),
+                lessonName: "lesson" + lessonsCount++
+            }
+        }))
+    });
+
+    app.get('/lessons/:lessonId', async (req, res) => {
+            let lessonVideoPath = path.join(RECORDS_PATH, req.params.lessonId +'.' + Encoder.FORMAT);
+            let stat = await fs.statP(lessonVideoPath)
+            let fileSize = stat.size;
+            let range = parseRange(fileSize, req.headers.range)[0];
+            let start = range.start;
+            let end = range.end;
+            let chunksize = (end-start)+1
+            let file = fs.createReadStream(lessonVideoPath, {start, end})
+            let head = {
+            'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+            'Accept-Ranges': 'bytes',
+            'Content-Length': chunksize,
+            'Content-Type': 'video/' + Encoder.FORMAT,
+            }
+            res.writeHead(206, head);
+            file.pipe(res);
+    });
+
+    log.info("starting server");
+    app.listen(8080);
+
 }
 
-s.listen(4000);
-
-const app = express()
-
-app.use('/static', express.static('build/static'))
-app.use('/', express.static('build'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.post('/login', (req, res) => {
-    let userId = req.body.userId;
-    let boardId = req.body.boardId;
-    let board = boardServer.getBoard(boardId);
-    res.send({
-        sessionId: board.sessionId,
-        canvasProperties: board.getCanvasProperties()
-    });
-});
-
-app.get('/lessons', async (req, res) => {
-    let lessons = await fs.readdirP(RECORDS_PATH);
-    let lessonsCount = 0;
-    res.send(lessons.map(lesson => {
-        return {
-            lessonId: path.basename(lesson, '.' + Encoder.FORMAT),
-            lessonName: "lesson" + lessonsCount++
-        }
-    }))
-});
-
-app.get('/lessons/:lessonId', async (req, res) => {
-        let lessonVideoPath = path.join(RECORDS_PATH, req.params.lessonId +'.' + Encoder.FORMAT);
-        let stat = await fs.statP(lessonVideoPath)
-        let fileSize = stat.size;
-        let range = parseRange(fileSize, req.headers.range)[0];
-        let start = range.start;
-        let end = range.end;
-        let chunksize = (end-start)+1
-        let file = fs.createReadStream(lessonVideoPath, {start, end})
-        let head = {
-        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-        'Accept-Ranges': 'bytes',
-        'Content-Length': chunksize,
-        'Content-Type': 'video/' + Encoder.FORMAT,
-        }
-        res.writeHead(206, head);
-        file.pipe(res);
-});
-
-//app.get('/', (req, res) => res.sendFile(__dirname + '/build/index.html'));
-
-log.info("starting server");
-app.listen(8080);
+main();
