@@ -1,5 +1,9 @@
 const socketio = require('socket.io');
 const express = require('express');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const sessions = require('client-sessions');
+
 const EventEmitter = require('events');
 const Bluebird = require('bluebird');
 const fs = require('fs');
@@ -18,9 +22,22 @@ const log = require('./common/logger');
 const Encoder = require('./board/record/ffmpeg_encoder');
 
 const DbConn = require('./db_conn');
+const Auth = require('./auth/auth');
+
 const Lessons = require('./data/lessons');
+const Users = require('./data/users');
 
 const RECORDS_PATH = path.join(process.cwd(), "records", "artifacts");
+
+
+
+function initializeAuth(users) {
+    let auth = new Auth(users);
+    passport.use(new LocalStrategy(auth.authenticate.bind(auth)));
+    passpert.serializeUser(auth.serializeSession.bind(auth));
+    passport.deserializeUser(auth.deserializeSession.bind(auth));
+}
+
 
 async function main() {
 
@@ -29,6 +46,8 @@ async function main() {
     }
 
     let dbConn = await DbConn.getDBConn();
+
+    // LIVE SESSIONS HANDLING
     let clientsMgr = new EventEmitter();
     let boardsMgr = new EventEmitter();
 
@@ -71,14 +90,25 @@ async function main() {
 
     s.listen(4000);
 
+
+    // WEB APPLICATION
     const app = express()
 
     app.use('/static', express.static('build/static'))
     app.use('/', express.static('build'));
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
+    app.use(sessions({
+        cookieName: 'session',
+        secret: 'secret'
+    }));
+    app.use(passport.initialize());
+    app.use(passport.session());
 
-    app.post('/login', (req, res) => {
+    let users = new Users(dbConn);
+    initializeAuth(users);
+
+    app.post('/login', passport.authenticate('local'), (req, res) => {
         let userId = req.body.userId;
         let boardId = req.body.boardId;
         let board = boardServer.getBoard(boardId);
@@ -102,7 +132,8 @@ async function main() {
         res.send();
     });
 
-    app.get('/lessons', async (req, res) => {
+    app.get('/lessons', Auth.parseUser, async (req, res) => {
+        let userId = req.user;
         let lessons = await fs.readdirP(RECORDS_PATH);
         let lessonsCount = 0;
         res.send(lessons.map(lesson => {

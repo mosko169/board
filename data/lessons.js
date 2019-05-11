@@ -19,8 +19,12 @@ class Lessons {
                                     [LESSON_STATUS.FINISHED, lessonId]);
     }
 
-    getLesson(lessonId) {
-
+    getLessons(userId) {
+        return this.dbConn.query("SELECT * FROM \
+                                lessons \
+                                JOIN courses on lessons.course_id=courses.course_id \
+                                JOIN users_courses on courses.course_id=users_courses.course_id \
+                                WHERE users_courses.user_id=$1", [userId]);
     }
 
 }
