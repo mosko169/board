@@ -25,6 +25,8 @@ A3=====Y-
 
 #define PRESSURE_THRESHOLD 500
 
+char data[100];
+
 void setup()
 {
   Serial.begin(9600);
@@ -72,13 +74,16 @@ void loop()
     X = 0;
     Y = 0;
   }
+  sprintf(data, "%d,%d,%d", X,Y,PRESSURE);
   delayMicroseconds(100);
   //Display X and Y on Serial Monitor
-  Serial.print("X = ");  
+  Serial.println(data);
+  /*Serial.print(X);  
   Serial.println(X);
   Serial.print("Y = ");
   Serial.println(Y);
   Serial.print("PRESSURE = ");
   Serial.println(PRESSURE);
+  */
   delay(200);
 }
