@@ -21,9 +21,12 @@ A3=====Y-
 #define MAX_X 900
 
 #define MIN_Y 120
-#define MAX_Y 900
+#define MAX_Y 870
 
-#define PRESSURE_THRESHOLD 500
+#define HEIGHT 400
+#define WIDTH 800
+
+#define PRESSURE_THRESHOLD 400
 
 char data[100];
 
@@ -31,7 +34,11 @@ void setup()
 {
   Serial.begin(9600);
 }
-  
+
+float normalize(int value, int minVal, int maxVal) {
+  return min(1, max(0, (float)(value - minVal)) / (maxVal - minVal));
+}
+
 void loop()
 {
   int X,Y, PRESSURE; //Touch Coordinates are stored in X,Y variable
@@ -43,7 +50,8 @@ void loop()
   pinMode(X2,OUTPUT);
   digitalWrite(X2,LOW);
   delayMicroseconds(100);
-  X = ((float)(analogRead(Y1) - MIN_X) / (MAX_X - MIN_X)) * 100;
+  X = analogRead(Y1);
+  X = normalize(X, MIN_X, MAX_X) * WIDTH;
   
   
   pinMode(X1,INPUT);
@@ -54,7 +62,8 @@ void loop()
   pinMode(Y2,OUTPUT);
   digitalWrite(Y2,LOW);
   delayMicroseconds(100);
-  Y = ((float)(analogRead(X1) - MIN_Y) / (MAX_Y - MIN_Y)) * 100;
+  Y = analogRead(X1);
+  Y = normalize(Y, MIN_Y, MAX_Y) * HEIGHT;
   
   // READ PRESSURE
     // Set X+ to ground
