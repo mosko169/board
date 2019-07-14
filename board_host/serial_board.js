@@ -4,9 +4,6 @@ const EventEmitter = require('events');
 const SerialPort = require('serialport');
 const Readline = require('@serialport/parser-readline');
 
-const PRESSURE_THRESHOLD = 500
-// Read the port data
-
 
 class SerialBoard extends EventEmitter {
     constructor(serialPortName) {
@@ -24,8 +21,8 @@ class SerialBoard extends EventEmitter {
     }
 
     _parseInput(input) {
-        let [x, y, pressure] = input.split(",").map(v => parseInt(v));
-        return {x, y, pressed: pressure > PRESSURE_THRESHOLD};
+        let [x, y, pressed] = input.split(",").map(v => parseInt(v));
+        return {x, y, pressed};
     }
 
     _handleInput(input) {

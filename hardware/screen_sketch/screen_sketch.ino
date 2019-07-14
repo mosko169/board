@@ -82,17 +82,12 @@ void loop()
   if (PRESSURE < PRESSURE_THRESHOLD) {
     X = 0;
     Y = 0;
+    PRESSURE = 0;
+  } else {
+    PRESSURE = 1;
   }
   sprintf(data, "%d,%d,%d", X,Y,PRESSURE);
-  delayMicroseconds(100);
-  //Display X and Y on Serial Monitor
   Serial.println(data);
-  /*Serial.print(X);  
-  Serial.println(X);
-  Serial.print("Y = ");
-  Serial.println(Y);
-  Serial.print("PRESSURE = ");
-  Serial.println(PRESSURE);
-  */
-  delay(200);
+
+  delay(20);
 }
