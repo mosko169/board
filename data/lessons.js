@@ -20,7 +20,7 @@ class Lessons {
     }
 
     getLessons(userId) {
-        return this.dbConn.query("SELECT * FROM \
+        return this.dbConn.query("SELECT lessons.lesson_id as lessonId, lessons.lesson_name as lessonName, courses.name as courseName FROM \
                                 lessons \
                                 JOIN courses on lessons.course_id=courses.course_id \
                                 JOIN users_courses on courses.course_id=users_courses.course_id \

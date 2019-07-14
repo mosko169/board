@@ -51,7 +51,8 @@ async function main() {
     let clientsMgr = new EventEmitter();
     let boardsMgr = new EventEmitter();
 
-    let boardServer = new BoardServer(boardsMgr, clientsMgr, new Lessons(dbConn));
+    let lessonsMgr = new Lessons(dbConn);
+    let boardServer = new BoardServer(boardsMgr, clientsMgr, lessonsMgr);
 
     let s = socketio({
         path: '/socket.io',
@@ -132,14 +133,14 @@ async function main() {
         res.send();
     });
 
-    app.get('/lessons', Auth.parseUser, async (req, res) => {
+    app.get('/lessons'/* , Auth.parseUser */, async (req, res) => {
         let userId = req.user;
-        let lessons = await fs.readdirP(RECORDS_PATH);
-        let lessonsCount = 0;
+        let lessons = await lessonsMgr.getLessons(userId);
         res.send(lessons.map(lesson => {
             return {
-                lessonId: path.basename(lesson, '.' + Encoder.FORMAT),
-                lessonName: "lesson" + lessonsCount++
+                lessonId: lesson.lessonId,
+                lessonName: lesson.lessonName,
+                courseName: lesson.courseName
             }
         }))
     });
