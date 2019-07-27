@@ -35,8 +35,8 @@
   */
   $('canvas').live('drag dragstart dragend', function(e) {
     type = e.handleObj.type;
-    x = e.layerX;
-    y = e.layerY;
+    x = e.offsetX;
+    y = e.offsetY;
     App.draw(x, y, type);
     App.socket.emit('drawing', {
       x: x,

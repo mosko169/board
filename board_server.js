@@ -2,9 +2,11 @@ const log = require('./common/logger');
 const crypto = require('crypto');
 
 class BoardServer {
-    constructor(boardsMgr, clientsMgr) {
+    constructor(boardsMgr, clientsMgr, lessonsMgr) {
         this.boardsMgr = boardsMgr;
         this.clientsMgr = clientsMgr;
+
+        this.lessonsMgr = lessonsMgr;
 
         this.boardClients = {};
         this.sessions = {};
@@ -19,7 +21,7 @@ class BoardServer {
         let sha = crypto.createHash('sha256');
         sha.update(Math.random().toString());
         return sha.digest('hex');
-    } 
+    }
 
     getBoard(boardId) {
         let board = this.boards[boardId];
@@ -29,11 +31,21 @@ class BoardServer {
         return board;
     }
 
-    startSession(boardId, sessionData) {
+    async startSession(boardId, sessionData) {
         let board = this.getBoard(boardId);
         let sessionId = BoardServer.generateSessionId();
+        log.info("starting session " + sessionId + " in board " + boardId);
         this.sessions[sessionId] = boardId;
-        board.setSession(sessionId, sessionData); 
+        let outputPath = board.setSession(sessionId, sessionData);
+        await this.lessonsMgr.addLesson(sessionId, boardId, sessionData.courseId, sessionData.lessonName, outputPath);
+    }
+
+    async stopSession(sessionId) {
+        let boardId = this.sessions[sessionId];
+        await this.boards[boardId].stopSession();
+        delete this.sessions[sessionId];
+        await this.lessonsMgr.lessonFinished(sessionId);
+        log.info("session " + sessionId + " in board " + boardId + " has stopped");
     }
 
     getBoardSession(boardId) {
@@ -55,7 +67,6 @@ class BoardServer {
         boardsMgr.on('newBoard', board => {
             this.boards[board.id] = board;
             this.boardClients[board.id] = {};
-            this.startSession(board.id);
         })
 
         boardsMgr.on('boardDisconnected', async boardId => {
@@ -68,9 +79,10 @@ class BoardServer {
             boundClient.boardDisconnected();
         })
         let boardCurrentSession = this.boards[boardId] && this.boards[boardId].sessionId;
-        await this.boards[boardId].stop();
+        if (boardCurrentSession) {
+            await this.stopSession(boardCurrentSession);
+        }
         delete this.boards[boardId];
-        delete this.sessions[boardCurrentSession];
     }
 
     _registerClientsMgr(clientsMgr) {

@@ -15,8 +15,6 @@ class MainPage extends React.Component {
         this.state = {
           showCanvs: false,
           showForm: true,
-          userId: 'koral',
-          boardId: '1',
           responseData: null,
         };
     this.handleSubmitForm = this.handleSubmitForm.bind(this);
@@ -40,7 +38,7 @@ class MainPage extends React.Component {
 
     renderElement(){
         if(this.state.showForm)
-           return <UserDetails onSubmitForm={this.handleSubmitForm} onChange={this.handleChange} userId={this.state.userId} boardId={this.state.boardId} responseData={this.state.responseData}/>;
+           return <UserDetails onSubmitForm={this.handleSubmitForm} onChange={this.handleChange} responseData={this.state.responseData}/>;
         return (<Canvas userId={this.state.userId} responseData={this.state.responseData} />);
      }
 

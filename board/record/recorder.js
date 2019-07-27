@@ -1,4 +1,3 @@
-const fs = require('fs');
 
 class Recorder {
     constructor(canvas, encoder, frameRate) {
@@ -15,6 +14,10 @@ class Recorder {
     stop() {
         clearInterval(this.sampler);
         return this.encoder.stop();
+    }
+
+    get outputPath() {
+        return this.encoder.outputPath;
     }
 
     _sampleFrame() {
