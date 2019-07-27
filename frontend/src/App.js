@@ -8,8 +8,12 @@ export default class UserDetails extends Component {
     super(props);
     this.responseData = null;
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.sendDataToServer = this.sendDataToServer.bind(this);
-    
+    this.sendDataToServer = this.sendDataToServer.bind(this);    
+    this.formData = {};
+  }
+
+  onChange(event) {
+    this.formData[event.target.name] = event.target.value;
   }
 
   handleSubmit(event){
@@ -21,7 +25,6 @@ export default class UserDetails extends Component {
     alert('need to insert that');
   }
 
-
   sendDataToServer() {
     return fetch('login/', {
     method: 'POST',
@@ -30,8 +33,9 @@ export default class UserDetails extends Component {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      userId: this.props.userId,
-      boardId: this.props.boardId,
+      username: this.formData.userId,
+      password: this.formData.password,
+      boardId: this.formData.boardId,
     })
   }).then(function(response){
     return response.json();
@@ -46,11 +50,15 @@ export default class UserDetails extends Component {
     <Form onSubmit={this.handleSubmit}>
       <Form.Group controlId="UserName">
         <Form.Label>Email address</Form.Label>
-        <Form.Control type="text" name="userId" defaultValue={this.props.userId} placeholder="Enter User Name" onChange={this.props.onChange}/>
+        <Form.Control type="text" name="userId" defaultValue={this.props.userId} placeholder="Enter User Name" onChange={this.onChange.bind(this)}/>
+      </Form.Group>
+      <Form.Group controlId="Password">
+        <Form.Label>Password</Form.Label>
+        <Form.Control type="password" name="password" onChange={this.onChange.bind(this)}/>
       </Form.Group>
       <Form.Group controlId="boardId">
         <Form.Label>boardId</Form.Label>
-        <Form.Control type="number" name="boardId" defaultValue={this.props.boardId} placeholder="board Id" onChange={this.props.onChange}/>
+        <Form.Control type="number" name="boardId" defaultValue={this.props.boardId} placeholder="board Id" onChange={this.onChange.bind(this)}/>
        </Form.Group>
       <Form.Group controlId="formBasicChecbox">
         <Form.Check type="checkbox" label="Remmember me" onClick={this.handleSaveUserData}/>

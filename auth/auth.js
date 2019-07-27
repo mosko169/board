@@ -9,18 +9,18 @@ class Auth {
 
     async authenticate(user, password, done) {
         try {
-            if (await users.userAuthenticated(user, password)) {
+            if (await this.users.userAuthenticated(user, password)) {
                 done(null, user);
             } else {
                 done(null, false, "invalid username or password");
             }
         } catch (err) {
-            done("error while trying to authenticate");
+            done("failed to authenticate user " + user + ", error: " + err);
         }
     }
 
     serializeSession(user, done) {
-        done(null, user.user_id);
+        done(null, user);
     }
 
     deserializeSession(id, done) {

@@ -14,7 +14,7 @@ class Users {
         if (user.rowCount == 0) {
             return false;
         }
-        user = user[0];
+        user = user.rows[0];
         let passHash = crypto.createHash('sha256');
         passHash.update(password + user.salt);
         return user.password == passHash.digest('hex');

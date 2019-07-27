@@ -26,6 +26,7 @@ const Auth = require('./auth/auth');
 
 const Lessons = require('./data/lessons');
 const Users = require('./data/users');
+const Courses = require('./data/courses');
 
 const RECORDS_PATH = path.join(process.cwd(), "records", "artifacts");
 
@@ -34,7 +35,7 @@ const RECORDS_PATH = path.join(process.cwd(), "records", "artifacts");
 function initializeAuth(users) {
     let auth = new Auth(users);
     passport.use(new LocalStrategy(auth.authenticate.bind(auth)));
-    passpert.serializeUser(auth.serializeSession.bind(auth));
+    passport.serializeUser(auth.serializeSession.bind(auth));
     passport.deserializeUser(auth.deserializeSession.bind(auth));
 }
 
@@ -52,6 +53,7 @@ async function main() {
     let boardsMgr = new EventEmitter();
 
     let lessonsMgr = new Lessons(dbConn);
+    let coursesMgr = new Courses(dbConn);
     let boardServer = new BoardServer(boardsMgr, clientsMgr, lessonsMgr);
 
     let s = socketio({
@@ -94,22 +96,26 @@ async function main() {
 
     // WEB APPLICATION
     const app = express()
+    let apiRouter = express.Router();
 
     app.use('/static', express.static('build/static'))
-    app.use('/', express.static('build'));
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
-    app.use(sessions({
+    app.use('/bla', express.static('build'));
+    app.use('/api', apiRouter);
+    app.use('/', apiRouter);
+    
+    apiRouter.use(express.json());
+    apiRouter.use(express.urlencoded({ extended: true }));
+    apiRouter.use(sessions({
         cookieName: 'session',
         secret: 'secret'
     }));
-    app.use(passport.initialize());
-    app.use(passport.session());
+    apiRouter.use(passport.initialize());
+    apiRouter.use(passport.session());
 
     let users = new Users(dbConn);
     initializeAuth(users);
 
-    app.post('/login', passport.authenticate('local'), (req, res) => {
+    apiRouter.post('/login', passport.authenticate('local'), (req, res) => {
         let userId = req.body.userId;
         let boardId = req.body.boardId;
         let board = boardServer.getBoard(boardId);
@@ -119,7 +125,7 @@ async function main() {
         });
     });
 
-    app.post('/liveSessions/start', (req, res) => {
+    apiRouter.post('/liveSessions/start', (req, res) => {
         let boardId = Number(req.body.boardId);
         let courseId = Number(req.body.courseId);
         let lessonName = req.body.lessonName;
@@ -127,13 +133,25 @@ async function main() {
         res.send();
     });
 
-    app.post('/liveSessions/stop', async (req, res) => {
+    apiRouter.post('/liveSessions/stop', async (req, res) => {
         let sessionId = req.body.sessionId;
         await boardServer.stopSession(sessionId);
         res.send();
     });
 
-    app.get('/lessons'/* , Auth.parseUser */, async (req, res) => {
+    apiRouter.get('/courses'/* , Auth.parseUser */, async (req, res) => {
+        let userId = req.user;
+        let courses = await coursesMgr.getUserCourses(userId);
+        res.send(courses);
+    });
+
+    apiRouter.get('/courses/:courseId'/* , Auth.parseUser */, async (req, res) => {
+        let courseId = req.params.courseId;
+        let lessons = await coursesMgr.getCourseLessons(courseId);
+        res.send(lessons);
+    });
+
+    apiRouter.get('/lessons'/* , Auth.parseUser */, async (req, res) => {
         let userId = req.user;
         let lessons = await lessonsMgr.getLessons(userId);
         res.send(lessons.map(lesson => {
@@ -145,7 +163,7 @@ async function main() {
         }))
     });
 
-    app.get('/lessons/:lessonId', async (req, res) => {
+    apiRouter.get('/lessons/:lessonId', async (req, res) => {
             let lessonVideoPath = path.join(RECORDS_PATH, req.params.lessonId +'.' + Encoder.FORMAT);
             let stat = await fs.statP(lessonVideoPath)
             let fileSize = stat.size;
