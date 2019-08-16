@@ -5,6 +5,7 @@ import './index.css';
 import * as serviceWorker from './serviceWorker';
 import Canvas from './Canvas'
 import UserDetails from './App'
+import LoginPage from './LoginPage'
 import { Lessons, Video }  from './lessons'
 import { Navbar, Nav} from 'react-bootstrap';
 import { Route, Link, BrowserRouter as Router } from 'react-router-dom'
@@ -68,7 +69,7 @@ class MainPage extends React.Component {
             </Nav>
         </Navbar.Collapse>
         </Navbar>
-        <Route exact path="/" component={MainPage} />
+        <Route exact path="/" component={LoginPage} />
         <Route path="/lessons" component={Lessons} />
         <Route path="/video" component={Video} />
       </div>
