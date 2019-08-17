@@ -76,9 +76,9 @@ class LoginPage extends React.Component {
       password: this.formData.password,
     })
   }).then(function(response){
-    return response.json();
+    return {};//response.json();
    }).then((data) =>{
-    this.props.onSubmitForm(data);
+    //this.props.onSubmitForm(data);
    })
   }
  

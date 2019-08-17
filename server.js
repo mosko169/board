@@ -117,12 +117,7 @@ async function main() {
 
     apiRouter.post('/login', passport.authenticate('local'), (req, res) => {
         let userId = req.body.userId;
-        let boardId = req.body.boardId;
-        let board = boardServer.getBoard(boardId);
-        res.send({
-            sessionId: board.sessionId,
-            canvasProperties: board.getCanvasProperties()
-        });
+        res.send();
     });
 
     apiRouter.post('/liveSessions/start', (req, res) => {
@@ -139,19 +134,19 @@ async function main() {
         res.send();
     });
 
-    apiRouter.get('/courses'/* , Auth.parseUser */, async (req, res) => {
+    apiRouter.get('/courses', Auth.parseUser , async (req, res) => {
         let userId = req.user;
         let courses = await coursesMgr.getUserCourses(userId);
         res.send(courses);
     });
 
-    apiRouter.get('/courses/:courseId'/* , Auth.parseUser */, async (req, res) => {
+    apiRouter.get('/courses/:courseId', Auth.parseUser, async (req, res) => {
         let courseId = req.params.courseId;
         let lessons = await coursesMgr.getCourseLessons(courseId);
         res.send(lessons);
     });
 
-    apiRouter.get('/lessons'/* , Auth.parseUser */, async (req, res) => {
+    apiRouter.get('/lessons', Auth.parseUser, async (req, res) => {
         let userId = req.user;
         let lessons = await lessonsMgr.getLessons(userId);
         res.send(lessons.map(lesson => {

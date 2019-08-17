@@ -52,7 +52,7 @@ class DbConn {
             user: 'postgres',
             host: 'localhost',
             database: 'board',
-            password: '1',
+            password: '123456',
         });
         
         await pool.query(CREATE_USERS_TABLE);

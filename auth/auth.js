@@ -31,7 +31,7 @@ class Auth {
         if (req.user) {
             next();
         } else {
-            res.send(401);
+            res.sendStatus(401);
         }
     }
 
