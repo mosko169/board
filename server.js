@@ -27,6 +27,7 @@ const Auth = require('./auth/auth');
 const Lessons = require('./data/lessons');
 const Users = require('./data/users');
 const Courses = require('./data/courses');
+const Boards = require('./data/boards');
 
 const RECORDS_PATH = path.join(process.cwd(), "records", "artifacts");
 
@@ -54,6 +55,8 @@ async function main() {
 
     let lessonsMgr = new Lessons(dbConn);
     let coursesMgr = new Courses(dbConn);
+    let boardsData = new Boards(dbConn);
+
     let boardServer = new BoardServer(boardsMgr, clientsMgr, lessonsMgr);
 
     let s = socketio({
@@ -125,6 +128,23 @@ async function main() {
         });
     });
 
+    apiRouter.get('/liveSessions'/* , Auth.parseUser */, async (req, res) => {
+        let userId = req.user;
+        let userLiveSessions = await lessonsMgr.getLiveSessions(userId);
+        res.send(userLiveSessions);
+    });
+
+    apiRouter.get('/liveSessions/:sessionId'/* , Auth.parseUser */, async (req, res) => {
+        let sessionId = req.params.sessionId;
+        let board = boardServer.getSessionBoard(sessionId);
+        let boardMetadata = await boardsMgr.getBoardMetadata(board.boardId);
+        res.send({
+            room: boardMetadata.room,
+            boardId: board.boardId,
+            canvasProperties: board.getCanvasProperties()
+        });
+    });
+
     apiRouter.post('/liveSessions/start', (req, res) => {
         let boardId = Number(req.body.boardId);
         let courseId = Number(req.body.courseId);
@@ -140,7 +160,7 @@ async function main() {
     });
 
     apiRouter.get('/courses'/* , Auth.parseUser */, async (req, res) => {
-        let userId = req.user;
+        let userId = "yarden";//req.user;
         let courses = await coursesMgr.getUserCourses(userId);
         res.send(courses);
     });
