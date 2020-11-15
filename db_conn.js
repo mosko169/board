@@ -7,6 +7,7 @@ const CREATE_USERS_TABLE = "CREATE TABLE IF NOT EXISTS public.users            \
                                 user_id character varying NOT NULL,       \
                                 password character varying,     \
                                 name character varying,         \
+                                salt character varying,         \
                                 PRIMARY KEY (user_id)           \
                             )";
 
