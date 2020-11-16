@@ -11,12 +11,15 @@ async function main() {
     let dbConn = await DbConn.getDBConn();
 
 
+    await test2()
+}
+
+async function test2() {
     let lessonsMgr = new Lessons(dbConn);
     let coursesMgr = new Courses(dbConn);
 
     let courses = await coursesMgr.getUserCourses("yarden");
     console.log(courses[0])
-
 }
 
 

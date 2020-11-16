@@ -32,7 +32,7 @@ class Lessons {
         let liveLessons = await this.dbConn.query('SELECT lessons.lesson_id as "lessonId", lessons.lesson_name as "lessonName", courses.name as "courseName", lessons.board_id as "boardId" \
                                     FROM lessons \
                                     JOIN courses on lessons.course_id=courses.course_id \
-                                    JOIN users_courses on courses.course_id=users_courses.course_id \
+                                    JOIN another_table on another_table.course_id=users_courses.course_id \
                                     WHERE users_courses.user_id=$1 AND lessons.status=$2', [userId, LESSON_STATUS.IN_PROGRESS]);
         return liveLessons.rows;        
     }
