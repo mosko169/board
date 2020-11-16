@@ -4,17 +4,23 @@ class Courses {
         this.dbConn = dbConn;
     }
 
-    async getUserCourses(user_id) {
-        return this.dbConn.query('SELECT * FROM \
+    async getUserCourses(userId) {
+        let courseRecords = await this.dbConn.query('SELECT courses.course_id as "courseId", courses.name as "courseName" FROM \
                                     public.users_courses \
 	                                JOIN courses on users_courses.course_id=courses.course_id \
-	                                where users_courses.user_id =$1', [user_id]);
+                                    where users_courses.user_id =$1', [userId]);
+        return courseRecords.rows;
     }
     
-    async getCourseLessons(course_id) {
-        return this.dbConn.query('SELECT * FROM \
-                                    public.lessons \
-                                    where course_id =$1', [course_id]);
+    async getCourseLessons(courseId) {
+        let lessonRecords = await this.dbConn.query('SELECT lesson_id as "lessonId", \
+                                                            course_id as "courseId", \
+                                                            board_id as "boardId",   \
+                                                            lesson_name as "lessonName" \
+                                                            status  \
+                                                    FROM public.lessons \
+                                                    where course_id =$1', [courseId]);
+        return lessonRecords.rows;
     }
 }
 

@@ -48,8 +48,8 @@ class BoardServer {
         log.info("session " + sessionId + " in board " + boardId + " has stopped");
     }
 
-    getBoardSession(boardId) {
-        return this.getBoard(boardId).sessionId;
+    getSessionBoard(sessionId) {
+        return this.getBoard(this.sessions[sessionId]);
     }
 
     addClient(client) {
